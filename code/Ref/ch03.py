@@ -1,0 +1,64 @@
+# coding: utf-8
+
+import numpy as np
+from matplotlib.colors import ListedColormap
+import matplotlib.pyplot as plt
+import matplotlib
+from distutils.version import LooseVersion
+
+
+
+def plot_decision_regions(X, y, classifier, test_idx=None, resolution=0.02):
+    # setup marker generator and color map
+    markers = ('s', 'x', 'o', '^', 'v')
+    colors = ('red', 'blue', 'lightgreen', 'gray', 'cyan')
+
+    cmap = ListedColormap(colors[:len(np.unique(y))])
+
+    # plot the decision surface
+
+    x1_min, x1_max = X.iloc[:, 0].min() - 1, X.iloc[:, 0].max() + 1
+    x2_min, x2_max = X.iloc[:, 1].min() - 1, X.iloc[:, 1].max() + 1
+    xx1, xx2 = np.meshgrid(np.arange(x1_min, x1_max, resolution),
+                           np.arange(x2_min, x2_max, resolution))
+    X_pred = np.array([xx1.ravel(), xx2.ravel()]).T
+    Z = classifier.predict(np.array([xx1.ravel(), xx2.ravel()]).T)
+    Z = Z.reshape(xx1.shape)
+    plt.contourf(xx1, xx2, Z, alpha=0.3, cmap=cmap)
+    plt.xlim(xx1.min(), xx1.max())
+    plt.ylim(xx2.min(), xx2.max())
+
+    for idx, cl in enumerate(np.unique(y)):
+        plt.scatter(x=X.loc[y == cl].iloc[:, 0],
+                    y=X.loc[y == cl].iloc[:, 1],
+                    alpha=0.8,
+                    color=colors[idx],
+                    marker=markers[idx],
+                    label=cl,
+                    edgecolor='black')
+
+    # highlight test examples
+    if test_idx:
+        # plot all examples
+        X_test, y_test = X.iloc[test_idx, :], y.iloc[test_idx]
+
+        if LooseVersion(matplotlib.__version__) < LooseVersion('0.3.4'):
+            plt.scatter(X_test.iloc[:, 0],
+                        X_test.iloc[:, 1],
+                        c='',
+                        edgecolor='black',
+                        alpha=1.0,
+                        linewidth=1,
+                        marker='o',
+                        s=100,
+                        label='test set')
+        else:
+            plt.scatter(X_test.iloc[:, 0],
+                        X_test.iloc[:, 1],
+                        c='none',
+                        edgecolor='black',
+                        alpha=1.0,
+                        linewidth=1,
+                        marker='o',
+                        s=100,
+                        label='test set')
